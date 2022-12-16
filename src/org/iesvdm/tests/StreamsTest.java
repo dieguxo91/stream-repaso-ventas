@@ -1,9 +1,11 @@
 package org.iesvdm.tests;
 
 import static org.junit.jupiter.api.Assertions.fail;
+import static java.util.stream.Collectors.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -137,6 +139,10 @@ class StreamsTest {
 			
 		
 			cliHome.commitTransaction();
+			
+			
+		
+			
 		}
 		catch (RuntimeException e) {
 			cliHome.rollbackTransaction();
@@ -158,6 +164,10 @@ class StreamsTest {
 			List<Comercial> list = comHome.findAll();		
 			
 			comHome.commitTransaction();
+			
+			Float maxComision = list.stream()
+									.collect(maxBy(Comparator.comparingDouble(Comercial::getComisión)));
+			
 		}
 		catch (RuntimeException e) {
 			comHome.rollbackTransaction();
@@ -182,6 +192,15 @@ class StreamsTest {
 			
 		
 			cliHome.commitTransaction();
+			
+			var listado = list.stream()
+								.filter(c -> c.getApellido2() != null)
+								.map(c -> c.getId() + c.getNombre()+ c.getApellido1() )
+								.sorted(Cliente::getApellido1)
+								//.collect(toList())
+								;
+			
+			
 		}
 		catch (RuntimeException e) {
 			cliHome.rollbackTransaction();
@@ -245,12 +264,22 @@ class StreamsTest {
 	void test7() {
 		
 		ComercialHome comHome = new ComercialHome();	
+		//PedidoHome pedHome = new PedidoHome();	
 		try {
+			//pedHome.beginTransaction();
 			comHome.beginTransaction();
-		
-			List<Comercial> list = comHome.findAll();		
 			
+			List<Comercial> list = comHome.findAll();		
 			comHome.commitTransaction();
+			
+			//List <Pedido> pedidos = pedHome.findAll();
+			//id_comercial ==1
+			//var mediaDanielSaez = pedidos.stream()
+											//.filter(p -> p.getComercial() == 1);
+			
+			Long mediaDanielSaez = list.stream()
+										.filter(c->c.getNombre().equals("Daniel")&c.getApellido1().equals("Sáez"))
+										.collect(averagingLong());
 		}
 		catch (RuntimeException e) {
 			comHome.rollbackTransaction();
